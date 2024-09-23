@@ -84,11 +84,7 @@ jobs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
-  # Detener la aplicación antes del despliegue
-  - script: |
-      C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:"$(AppPool)"
-    displayName: 'Stop Application Pool'
-  
+  # Detener la aplicación antes del despliegu
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
       WebSiteName: '$(webSiteName)'
@@ -100,7 +96,3 @@ jobs:
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
   
-  # Reiniciar la aplicación después del despliegue
-  - script: |
-      C:\Windows\System32\inetsrv\appcmd start apppool /apppool.name:"$(AppPool)"
-    displayName: 'Start Application Pool'
