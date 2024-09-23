@@ -84,13 +84,13 @@ jobs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
-  - script: |
-      Import-Module WebAdministration
-      # Detén la aplicación virtual
-      Stop-WebAppPool -Name '$(AppPool)'  # Detén el pool de la aplicación
-      Stop-WebItem "IIS:\Sites\$(webSiteName)\$(siteSubfolder)"  # Pone la aplicación offline
-      Start-Sleep -Seconds 5  # Espera un momento para asegurarte de que se haya detenido
-    displayName: 'Stop Application Subfolder'
+  # Detener el Application Pool antes del despliegue
+  - task: IISWebAppManagementOnMachineGroup@0
+    displayName: 'Stop Application Pool'
+    inputs:
+      WebSiteName: '$(webSiteName)'  # Nombre del sitio web
+      WebAppName: '$(siteSubfolder)'  # Nombre del Application Pool asociado a la subcarpeta
+      Command: 'Stop'  # Detener el Application Pool
 
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
@@ -103,9 +103,10 @@ jobs:
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
   
-  - script: |
-      Import-Module WebAdministration
-      # Inicia la aplicación virtual
-      Start-WebItem "IIS:\Sites\$(webSiteName)\$(siteSubfolder)"  # Quita la aplicación del estado offline
-      Start-WebAppPool -Name '$(AppPoolName)'  # Inicia el pool de la aplicación
-    displayName: 'Start Application Subfolder'
+  # Iniciar el Application Pool despues del despliegue
+  - task: IISWebAppManagementOnMachineGroup@0
+    displayName: 'Start Application Pool'
+    inputs:
+      WebSiteName: '$(webSiteName)'  # Nombre del sitio web
+      WebAppName: '$(siteSubfolder)'  # Nombre del Application Pool asociado a la subcarpeta
+      Command: 'Start' 
