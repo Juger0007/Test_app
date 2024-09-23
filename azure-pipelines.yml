@@ -91,7 +91,5 @@ jobs:
       EnableMSDeployAppOffline: true  # Esta línea es clave
       TakeAppOfflineFlag: true
       XmlTransformation: true
-      EnableMSDeployAppOffline: true
       RemoveAdditionalFilesFlag: true
-      TakeAppOfflineFlag: true
       AdditionalArguments: '-allowUntrusted'
