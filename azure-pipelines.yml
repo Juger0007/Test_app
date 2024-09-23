@@ -88,6 +88,8 @@ jobs:
       WebSiteName: '$(webSiteName)'
       VirtualApplication: '$(siteSubfolder)'  # Especifica la subcarpeta dentro del sitio web
       Package: '$(Pipeline.Workspace)/final_deploy'
+      EnableMSDeployAppOffline: true  # Esta línea es clave
+      TakeAppOfflineFlag: true
       XmlTransformation: true
       EnableMSDeployAppOffline: true
       RemoveAdditionalFilesFlag: true
