@@ -10,7 +10,7 @@ variables:
   buildConfiguration: 'Release'
   webSiteName: 'Default Web Site'
   siteSubfolder: 'Test_app' 
-  AppPool: 'Test_app' # La subcarpeta dentro del sitio web donde se desplegará el contenido
+  AppPool: 'Test_app' # Nombre del pool de aplicaciones
   publishPath: '$(Build.ArtifactStagingDirectory)/drop'
 
 jobs:
@@ -84,9 +84,11 @@ jobs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
+  # Detener la aplicación antes del despliegue
   - script: |
-      C:\Windows\System32\inetsrv\appcmd stop apppool /Test_app:"$(siteSubfolder)"
+      C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:"$(AppPool)"
     displayName: 'Stop Application Pool'
+  
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
       WebSiteName: '$(webSiteName)'
@@ -98,6 +100,7 @@ jobs:
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
   
+  # Reiniciar la aplicación después del despliegue
   - script: |
-      C:\Windows\System32\inetsrv\appcmd start apppool /Test_app:"$(siteSubfolder)"
+      C:\Windows\System32\inetsrv\appcmd start apppool /apppool.name:"$(AppPool)"
     displayName: 'Start Application Pool'
