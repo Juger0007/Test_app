@@ -85,9 +85,12 @@ jobs:
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
   # Detener la aplicación antes del despliegu
-  - script: |
-      C:\Users\sv-mx29-intranet\Downloads\agent\appclose\Start_Stop_App.exe stop Test_app
-    displayName: 'Stop Application Pool'
+  - task: IISWebAppManagementOnMachineGroup@0
+    displayName: Stop AppPool
+    inputs:
+      IISDeploymentType: 'IISApplicationPool'
+      ActionIISApplicationPool: 'StopAppPool'
+      StartStopRecycleAppPoolName: '$(AppPool)' 
   
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
@@ -100,6 +103,9 @@ jobs:
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
   
-  - script: |
-      C:\Users\sv-mx29-intranet\Downloads\agent\appclose\Start_Stop_App.exe start Test_app
-    displayName: 'start Application Pool'
+  - task: IISWebAppManagementOnMachineGroup@0
+    displayName: Stop AppPool
+    inputs:
+      IISDeploymentType: 'IISApplicationPool'
+      ActionIISApplicationPool: 'StartAppPool'
+      StartStopRecycleAppPoolName: '$(AppPool)' 
