@@ -84,12 +84,17 @@ jobs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
-  # Detener el Application Pool antes del despliegue
   - task: IISWebAppManagementOnMachineGroup@0
     displayName: 'Stop Application Pool'
     inputs:
       WebSiteName: '$(webSiteName)'  # Nombre del sitio web
-      WebAppName: '$(siteSubfolder)'  # Nombre del Application Pool asociado a la subcarpeta
+      Package: ''  # No se necesita un paquete aquí
+      XmlTransformation: false
+      EnableMSDeployAppOffline: false
+      TakeAppOfflineFlag: false
+      RemoveAdditionalFilesFlag: false
+      AdditionalArguments: '-allowUntrusted'
+      WebAppName: '$(AppPool)'  # Especifica el nombre del Application Pool
       Command: 'Stop'  # Detener el Application Pool
 
   - task: IISWebAppDeploymentOnMachineGroup@0
@@ -103,10 +108,15 @@ jobs:
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
   
-  # Iniciar el Application Pool despues del despliegue
   - task: IISWebAppManagementOnMachineGroup@0
-    displayName: 'Start Application Pool'
+    displayName: 'Stop Application Pool'
     inputs:
       WebSiteName: '$(webSiteName)'  # Nombre del sitio web
-      WebAppName: '$(siteSubfolder)'  # Nombre del Application Pool asociado a la subcarpeta
-      Command: 'Start' 
+      Package: ''  # No se necesita un paquete aquí
+      XmlTransformation: false
+      EnableMSDeployAppOffline: false
+      TakeAppOfflineFlag: false
+      RemoveAdditionalFilesFlag: false
+      AdditionalArguments: '-allowUntrusted'
+      WebAppName: '$(AppPool)'  # Especifica el nombre del Application Pool
+      Command: 'Start'  # Detener el Application Pool
