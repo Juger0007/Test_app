@@ -9,7 +9,8 @@ pool:
 variables:
   buildConfiguration: 'Release'
   webSiteName: 'Default Web Site'
-  siteSubfolder: 'Test_app'  # La subcarpeta dentro del sitio web donde se desplegará el contenido
+  siteSubfolder: 'Test_app' 
+  AppPool: 'Test_app' # La subcarpeta dentro del sitio web donde se desplegará el contenido
   publishPath: '$(Build.ArtifactStagingDirectory)/drop'
 
 jobs:
@@ -82,6 +83,14 @@ jobs:
     inputs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
+  
+  - script: |
+      Import-Module WebAdministration
+      # Detén la aplicación virtual
+      Stop-WebAppPool -Name '$(AppPool)'  # Detén el pool de la aplicación
+      Stop-WebItem "IIS:\Sites\$(webSiteName)\$(siteSubfolder)"  # Pone la aplicación offline
+      Start-Sleep -Seconds 5  # Espera un momento para asegurarte de que se haya detenido
+    displayName: 'Stop Application Subfolder'
 
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
@@ -93,3 +102,10 @@ jobs:
       XmlTransformation: true
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
+  
+  - script: |
+      Import-Module WebAdministration
+      # Inicia la aplicación virtual
+      Start-WebItem "IIS:\Sites\$(webSiteName)\$(siteSubfolder)"  # Quita la aplicación del estado offline
+      Start-WebAppPool -Name '$(AppPoolName)'  # Inicia el pool de la aplicación
+    displayName: 'Start Application Subfolder'
