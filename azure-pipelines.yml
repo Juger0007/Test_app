@@ -84,19 +84,9 @@ jobs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
-  - task: IISWebAppManagementOnMachineGroup@0
+  - script: |
+      C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:"$(siteSubfolder)"
     displayName: 'Stop Application Pool'
-    inputs:
-      WebSiteName: '$(webSiteName)'  # Nombre del sitio web
-      Package: ''  # No se necesita un paquete aquí
-      XmlTransformation: false
-      EnableMSDeployAppOffline: false
-      TakeAppOfflineFlag: false
-      RemoveAdditionalFilesFlag: false
-      AdditionalArguments: '-allowUntrusted'
-      WebAppName: '$(AppPool)'  # Especifica el nombre del Application Pool
-      Command: 'Stop'  # Detener el Application Pool
-
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
       WebSiteName: '$(webSiteName)'
@@ -108,15 +98,6 @@ jobs:
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
   
-  - task: IISWebAppManagementOnMachineGroup@0
-    displayName: 'Stop Application Pool'
-    inputs:
-      WebSiteName: '$(webSiteName)'  # Nombre del sitio web
-      Package: ''  # No se necesita un paquete aquí
-      XmlTransformation: false
-      EnableMSDeployAppOffline: false
-      TakeAppOfflineFlag: false
-      RemoveAdditionalFilesFlag: false
-      AdditionalArguments: '-allowUntrusted'
-      WebAppName: '$(AppPool)'  # Especifica el nombre del Application Pool
-      Command: 'Start'  # Detener el Application Pool
+  - script: |
+      C:\Windows\System32\inetsrv\appcmd start apppool /apppool.name:"$(siteSubfolder)"
+    displayName: 'Start Application Pool'
