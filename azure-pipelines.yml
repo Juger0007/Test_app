@@ -85,7 +85,7 @@ jobs:
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
   - script: |
-      C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:"$(siteSubfolder)"
+      C:\Windows\System32\inetsrv\appcmd stop apppool /Test_app:"$(siteSubfolder)"
     displayName: 'Stop Application Pool'
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
@@ -99,5 +99,5 @@ jobs:
       AdditionalArguments: '-allowUntrusted'
   
   - script: |
-      C:\Windows\System32\inetsrv\appcmd start apppool /apppool.name:"$(siteSubfolder)"
+      C:\Windows\System32\inetsrv\appcmd start apppool /Test_app:"$(siteSubfolder)"
     displayName: 'Start Application Pool'
