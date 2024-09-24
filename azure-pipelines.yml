@@ -108,7 +108,19 @@ jobs:
   steps:
   - script: |
       echo "Cleaning up temporary files..."
-      rmdir /s /q "$(Pipeline.Workspace)/drop"
-      rmdir /s /q "$(Pipeline.Workspace)/extracted"
-      rmdir /s /q "$(Pipeline.Workspace)/final_deploy"
+      if exist "$(Pipeline.Workspace)\drop" (
+        rmdir /s /q "$(Pipeline.Workspace)\drop"
+      ) else (
+        echo "Drop directory does not exist."
+      )
+      if exist "$(Pipeline.Workspace)\extracted" (
+        rmdir /s /q "$(Pipeline.Workspace)\extracted"
+      ) else (
+        echo "Extracted directory does not exist."
+      )
+      if exist "$(Pipeline.Workspace)\final_deploy" (
+        rmdir /s /q "$(Pipeline.Workspace)\final_deploy"
+      ) else (
+        echo "Final deploy directory does not exist."
+      )
     displayName: 'Remove Temporary Directories'
