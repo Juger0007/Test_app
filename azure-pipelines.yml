@@ -84,13 +84,7 @@ jobs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
   
-  # Detener la aplicación antes del despliegu
-  - task: IISWebAppManagementOnMachineGroup@0
-    displayName: Stop AppPool
-    inputs:
-      IISDeploymentType: 'IISApplicationPool'
-      ActionIISApplicationPool: 'StopAppPool'
-      StartStopRecycleAppPoolName: '$(AppPool)' 
+
   
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
@@ -103,9 +97,18 @@ jobs:
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
   
-  - task: IISWebAppManagementOnMachineGroup@0
-    displayName: Stop AppPool
-    inputs:
-      IISDeploymentType: 'IISApplicationPool'
-      ActionIISApplicationPool: 'StartAppPool'
-      StartStopRecycleAppPoolName: '$(AppPool)' 
+
+
+- job: CleanUp
+  displayName: 'Clean Up Temporary Files'
+  dependsOn: Deploy
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - script: |
+      echo "Cleaning up temporary files..."
+      rmdir /s /q "$(Pipeline.Workspace)/drop"
+      rmdir /s /q "$(Pipeline.Workspace)/extracted"
+      rmdir /s /q "$(Pipeline.Workspace)/final_deploy"
+    displayName: 'Remove Temporary Directories'
