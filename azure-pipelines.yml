@@ -116,6 +116,7 @@ jobs:
       XmlTransformation: true
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
+    retryCountOnTaskFailure: 3
 
 - job: CleanUp
   displayName: 'Clean Up Temporary Files'
