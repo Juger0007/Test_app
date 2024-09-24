@@ -14,14 +14,29 @@ variables:
   publishPath: '$(Build.ArtifactStagingDirectory)/drop'
 
 jobs:
-- job: BuildAndPublish
-  displayName: 'Build and Publish'
+- job: Build
+  displayName: 'Build Projects'
   steps:
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore dependencies'
+
+  - powershell: New-Item -ItemType Directory -Path "$(Pipeline.Workspace)\.nuget\packages" -Force
+    displayName: 'Ensure NuGet packages directory exists'
+
+  - task: Cache@2
+    displayName: 'Cache NuGet packages'
     inputs:
-      command: 'restore'
-      projects: '**/*.csproj'
+      key: 'nuget | "$(Agent.OS)" | **/*.csproj'
+      path: '$(Pipeline.Workspace)/.nuget/packages'
+      restoreKeys: |
+        nuget | "$(Agent.OS)"
+      enabled: true
+      verbose: true  # Habilita la salida detallada
+
+  
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '8.0.x'  # Instala la última versión de .NET 8.0.x disponible
+      installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - task: DotNetCoreCLI@2
     displayName: 'Build project'
@@ -30,6 +45,10 @@ jobs:
       projects: '**/*.csproj'
       arguments: '--configuration $(buildConfiguration)'
 
+- job: Test
+  displayName: 'Run Tests'
+  dependsOn: Build
+  steps:
   - task: DotNetCoreCLI@2
     displayName: 'Run tests'
     inputs:
@@ -37,6 +56,10 @@ jobs:
       projects: '**/*.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build --verbosity normal'
 
+- job: Publish
+  displayName: 'Publish Artifacts'
+  dependsOn: Build
+  steps:
   - task: DotNetCoreCLI@2
     displayName: 'Publish project'
     inputs:
@@ -47,7 +70,7 @@ jobs:
   - task: ArchiveFiles@2
     displayName: 'Archive Published Files into ZIP'
     inputs:
-      rootFolderOrFile: '$(publishPath)'   # Asegúrate de que esta ruta apunte a los archivos publicados
+      rootFolderOrFile: '$(publishPath)' 
       includeRootFolder: false
       archiveFile: '$(publishPath)/$(Build.BuildId).zip'
 
@@ -60,10 +83,10 @@ jobs:
 
 - job: Deploy
   displayName: 'Deploy to IIS'
-  dependsOn: BuildAndPublish
+  dependsOn: Publish
   pool:
     name: 'AeroMxlServer'
-   
+  
   steps:
   - task: DownloadPipelineArtifact@2
     inputs:
@@ -77,50 +100,40 @@ jobs:
       archiveFilePatterns: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
       destinationFolder: '$(Pipeline.Workspace)/extracted'
 
-  # Descomprime el ZIP dentro del ZIP
   - task: ExtractFiles@1
     displayName: 'Extract Inner ZIP'
     inputs:
       archiveFilePatterns: '$(Pipeline.Workspace)/extracted/*.zip'
       destinationFolder: '$(Pipeline.Workspace)/final_deploy'
-  
 
-  
   - task: IISWebAppDeploymentOnMachineGroup@0
     inputs:
       WebSiteName: '$(webSiteName)'
-      VirtualApplication: '$(siteSubfolder)'  # Especifica la subcarpeta dentro del sitio web
+      VirtualApplication: '$(siteSubfolder)'
       Package: '$(Pipeline.Workspace)/final_deploy'
-      EnableMSDeployAppOffline: true  # Esta línea es clave
+      EnableMSDeployAppOffline: true
       TakeAppOfflineFlag: true
       XmlTransformation: true
       RemoveAdditionalFilesFlag: true
       AdditionalArguments: '-allowUntrusted'
-  
-
 
 - job: CleanUp
   displayName: 'Clean Up Temporary Files'
   dependsOn: Deploy
   pool:
     vmImage: 'windows-latest'
-
+  
   steps:
-  - script: |
-      echo "Cleaning up temporary files..."
-      if exist "$(Pipeline.Workspace)\drop" (
-        rmdir /s /q "$(Pipeline.Workspace)\drop"
-      ) else (
-        echo "Drop directory does not exist."
-      )
-      if exist "$(Pipeline.Workspace)\extracted" (
-        rmdir /s /q "$(Pipeline.Workspace)\extracted"
-      ) else (
-        echo "Extracted directory does not exist."
-      )
-      if exist "$(Pipeline.Workspace)\final_deploy" (
-        rmdir /s /q "$(Pipeline.Workspace)\final_deploy"
-      ) else (
-        echo "Final deploy directory does not exist."
-      )
+  - task: DeleteFiles@1
     displayName: 'Remove Temporary Directories'
+    inputs:
+      SourceFolder: '$(Pipeline.Workspace)/drop'
+      Contents: '**' 
+      removeSourceFolder: true
+
+  - task: DeleteFiles@1
+    displayName: 'Remove Extracted Directory'
+    inputs:
+      SourceFolder: '$(Pipeline.Workspace)/extracted'
+      Contents: '**'
+      removeSourceFolder: true
