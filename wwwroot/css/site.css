@@ -20,3 +20,21 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.reveal-container {
+    position: relative;
+    height: calc(100vh - 150px); /* Ajusta el tamaño dinámicamente según el header y footer */
+    overflow: hidden; /* Evita que los elementos de Reveal.js se salgan del contenedor */
+}
+
+.reveal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.navbar,
+footer {
+    display: none; /* Oculta la barra de navegación y el footer */
+}

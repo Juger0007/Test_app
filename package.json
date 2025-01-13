@@ -1,0 +1,24 @@
+{
+  "name": "test_app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Juger0007/Test_app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Juger0007/Test_app/issues"
+  },
+  "homepage": "https://github.com/Juger0007/Test_app#readme",
+  "description": "",
+  "dependencies": {
+    "reveal.js": "^5.1.0",
+    "reveal.js-menu": "^2.1.0"
+  }
+}
